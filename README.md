@@ -14,10 +14,3 @@ ReguAI adalah chatbot informasi hukum Indonesia berbasis Retrieval-Augmented Gen
 ## Arsitektur
 
 PDF → Text Extraction → Chunking per Pasal → Embedding → FAISS Vector Database → Retrieval → Reranking → LLM Groq → Streamlit UI
-
-## Cara Menjalankan
-
-Install dependency:
-
-```bash
-pip install -r requirements.txt
