@@ -113,22 +113,45 @@ def is_too_general_query(query: str) -> bool:
     Mengecek apakah pertanyaan terlalu umum sehingga tidak layak langsung
     dikirim ke LLM.
 
-    Contoh query terlalu umum:
+    Contoh:
     - "uu ite"
+    - "apa itu uu ite"
     - "kuhp"
-    - "hukum pidana"
-    - "data pribadi"
+    - "apa itu uu pdp"
     """
 
-    q = query.lower().strip()
+    q = query.lower().strip().replace("?", "")
+
+    definition_prefixes = [
+        "apa itu ",
+        "apa definisi ",
+        "definisi ",
+        "pengertian ",
+        "apa yang dimaksud dengan ",
+        "apa yang dimaksud ",
+    ]
+
+    for prefix in definition_prefixes:
+        if q.startswith(prefix):
+            q = q.replace(prefix, "", 1).strip()
 
     general_queries = [
         "uu ite",
         "ite",
+        "undang undang ite",
+        "undang-undang ite",
+        "uu informasi dan transaksi elektronik",
+        "informasi dan transaksi elektronik",
         "uu pdp",
         "pdp",
+        "undang undang pdp",
+        "undang-undang pdp",
+        "pelindungan data pribadi",
+        "perlindungan data pribadi",
         "kuhp",
         "uu kuhp",
+        "kitab undang undang hukum pidana",
+        "kitab undang-undang hukum pidana",
         "hukum digital",
         "hukum pidana",
         "data pribadi",
@@ -141,10 +164,69 @@ def is_too_general_query(query: str) -> bool:
     return q in general_queries
 
 
-def build_too_general_answer():
+def build_too_general_answer(query: str = ""):
     """
     Jawaban standar ketika pertanyaan pengguna terlalu umum.
     """
+
+    q = query.lower().strip()
+
+    if "ite" in q or "transaksi elektronik" in q:
+        return """
+Pertanyaan masih terlalu umum.
+
+Dalam basis data ReguAI tersedia dokumen UU ITE, tetapi sistem tidak membuat definisi umum sendiri jika tidak ada definisi eksplisit dalam pasal.
+
+Silakan ajukan pertanyaan yang lebih spesifik, misalnya:
+- Apa itu transaksi elektronik?
+- Apa itu informasi elektronik?
+- Apa itu dokumen elektronik?
+- Apa itu sistem elektronik?
+- Apa sanksi pencemaran nama baik di media sosial?
+- Apa hukuman bagi seseorang yang menyalahgunakan sosial media untuk menyebarkan kebohongan?
+
+Catatan:
+ReguAI menjawab berdasarkan pasal dan dokumen hukum yang tersedia dalam basis data.
+"""
+
+    if (
+        "pdp" in q
+        or "data pribadi" in q
+        or "pelindungan data" in q
+        or "perlindungan data" in q
+    ):
+        return """
+Pertanyaan masih terlalu umum.
+
+Dalam basis data ReguAI tersedia dokumen UU Pelindungan Data Pribadi, tetapi sistem hanya menjawab berdasarkan ketentuan yang relevan di dalam pasal.
+
+Silakan ajukan pertanyaan yang lebih spesifik, misalnya:
+- Apa itu data pribadi?
+- Apa itu subjek data pribadi?
+- Apa itu pengendali data pribadi?
+- Apa hak subjek data pribadi?
+- Apa sanksi penyalahgunaan data pribadi?
+- Apa hukuman untuk orang yang menyalahgunakan data orang lain?
+
+Catatan:
+ReguAI menjawab berdasarkan pasal dan dokumen hukum yang tersedia dalam basis data.
+"""
+
+    if "kuhp" in q or "pidana" in q:
+        return """
+Pertanyaan masih terlalu umum.
+
+Dalam basis data ReguAI tersedia dokumen KUHP 2023 dan UU Penyesuaian Pidana 2026. Namun, pertanyaan perlu dibuat lebih spesifik agar sistem dapat mencari pasal yang relevan.
+
+Silakan ajukan pertanyaan yang lebih spesifik, misalnya:
+- Apa yang dimaksud dengan tindak pidana?
+- Apa sanksi pencurian?
+- Apa sanksi penipuan?
+- Kategori II itu dendanya berapa?
+
+Catatan:
+ReguAI menjawab berdasarkan pasal dan dokumen hukum yang tersedia dalam basis data.
+"""
 
     return """
 Pertanyaan masih terlalu umum.
@@ -154,12 +236,11 @@ Silakan ajukan pertanyaan yang lebih spesifik, misalnya:
 - Apa sanksi pencemaran nama baik di media sosial?
 - Apa sanksi penyalahgunaan data pribadi?
 - Apa hukuman untuk orang yang menyalahgunakan data orang lain?
-- Apa hukuman bagi seseorang yang menyalahgunakan sosial media untuk menyebarkan kebohongan?
 - Apa yang dimaksud dengan tindak pidana?
 - Kategori II itu dendanya berapa?
 
 Catatan:
-ReguAI akan menjawab berdasarkan dokumen hukum yang tersedia dalam basis data.
+ReguAI menjawab berdasarkan pasal dan dokumen hukum yang tersedia dalam basis data.
 """
 
 
@@ -182,18 +263,39 @@ def retrieve_documents(query: str):
     """
     Melakukan retrieval dokumen dari FAISS.
 
-    Alur:
-    1. Cek apakah pertanyaan masih dalam cakupan ReguAI.
-    2. Bangun search query.
-    3. Ambil kandidat dokumen dari FAISS.
-    4. Filter berdasarkan threshold.
-    5. Rerank hasil retrieval.
+    Catatan:
+    Reranking dilakukan sebelum threshold final agar query natural seperti
+    "hukuman menyalahgunakan sosial media untuk menyebarkan kebohongan"
+    tidak langsung ditolak hanya karena distance semantic awal cukup besar.
     """
 
     if not is_in_scope(query):
         return []
 
-    retrieval_k = 100 if is_definition_question(query) else TOP_K_INITIAL
+    wide_retrieval_terms = [
+        "hukuman",
+        "menyalahgunakan",
+        "penyalahgunaan",
+        "data orang lain",
+        "data pribadi orang lain",
+        "sosial media",
+        "media sosial",
+        "kebohongan",
+        "berita bohong",
+        "hoaks",
+        "hoax",
+        "informasi bohong",
+        "informasi palsu",
+        "informasi menyesatkan",
+        "menyesatkan",
+    ]
+
+    q = query.lower().strip()
+
+    if is_definition_question(query) or any(term in q for term in wide_retrieval_terms):
+        retrieval_k = 100
+    else:
+        retrieval_k = TOP_K_INITIAL
 
     initial_results = vectorstore.similarity_search_with_score(
         build_search_query(query),
@@ -203,12 +305,20 @@ def retrieve_documents(query: str):
     if not initial_results:
         return []
 
+    reranked_results = rerank_results(query, initial_results)
+
+    if reranked_results:
+        best_keyword_score = float(reranked_results[0][2])
+
+        if best_keyword_score > 0:
+            return reranked_results
+
     best_score = float(initial_results[0][1])
 
     if best_score > MAX_SCORE_THRESHOLD:
         return []
 
-    return rerank_results(query, initial_results)
+    return reranked_results
 
 
 def save_assistant_message(answer: str):
@@ -339,7 +449,7 @@ if user_query:
 
     with st.chat_message("assistant"):
         if is_too_general_query(user_query):
-            answer = build_too_general_answer()
+            answer = build_too_general_answer(user_query)
             st.markdown(answer)
             save_assistant_message(answer)
             st.session_state.sources = []
