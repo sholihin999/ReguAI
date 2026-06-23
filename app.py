@@ -18,6 +18,7 @@ load_dotenv()
 
 st.set_page_config(page_title="ReguAI", page_icon="⚖️", layout="wide")
 
+
 @st.cache_resource
 def load_resources():
     """
@@ -107,6 +108,76 @@ def get_explicit_definition_status(query: str) -> bool:
     return any(term in q for term in allowed_terms)
 
 
+def is_too_general_query(query: str) -> bool:
+    """
+    Mengecek apakah pertanyaan terlalu umum sehingga tidak layak langsung
+    dikirim ke LLM.
+
+    Contoh query terlalu umum:
+    - "uu ite"
+    - "kuhp"
+    - "hukum pidana"
+    - "data pribadi"
+    """
+
+    q = query.lower().strip()
+
+    general_queries = [
+        "uu ite",
+        "ite",
+        "uu pdp",
+        "pdp",
+        "kuhp",
+        "uu kuhp",
+        "hukum digital",
+        "hukum pidana",
+        "data pribadi",
+        "tindak pidana",
+        "pidana",
+        "pasal",
+        "uu",
+    ]
+
+    return q in general_queries
+
+
+def build_too_general_answer():
+    """
+    Jawaban standar ketika pertanyaan pengguna terlalu umum.
+    """
+
+    return """
+Pertanyaan masih terlalu umum.
+
+Silakan ajukan pertanyaan yang lebih spesifik, misalnya:
+- Apa itu transaksi elektronik?
+- Apa sanksi pencemaran nama baik di media sosial?
+- Apa sanksi penyalahgunaan data pribadi?
+- Apa hukuman untuk orang yang menyalahgunakan data orang lain?
+- Apa hukuman bagi seseorang yang menyalahgunakan sosial media untuk menyebarkan kebohongan?
+- Apa yang dimaksud dengan tindak pidana?
+- Kategori II itu dendanya berapa?
+
+Catatan:
+ReguAI akan menjawab berdasarkan dokumen hukum yang tersedia dalam basis data.
+"""
+
+
+def build_llm_error_answer():
+    """
+    Jawaban standar ketika retrieval berhasil tetapi pemanggilan LLM gagal.
+    """
+
+    return """
+Maaf, terjadi kendala saat menghubungi layanan LLM.
+
+Silakan coba beberapa saat lagi atau gunakan pertanyaan yang lebih spesifik.
+
+Catatan:
+Hasil retrieval sumber hukum berhasil dilakukan, tetapi proses penyusunan jawaban oleh model bahasa gagal.
+"""
+
+
 def retrieve_documents(query: str):
     """
     Melakukan retrieval dokumen dari FAISS.
@@ -163,6 +234,8 @@ def generate_answer(user_query: str, retrieved):
 
     Untuk pertanyaan non-definisi:
     - Sistem menggunakan seluruh hasil reranking.
+
+    Fungsi ini juga diberi try-except agar aplikasi tidak crash jika Groq error.
     """
 
     if not retrieved:
@@ -180,14 +253,20 @@ def generate_answer(user_query: str, retrieved):
 
         docs_for_answer = docs[:1]
         prompt = build_legal_prompt(user_query, docs_for_answer)
-        response = llm.invoke(prompt)
 
-        return response.content, retrieved[:1]
+        try:
+            response = llm.invoke(prompt)
+            return response.content, retrieved[:1]
+        except Exception:
+            return build_llm_error_answer(), retrieved[:1]
 
     prompt = build_legal_prompt(user_query, docs)
-    response = llm.invoke(prompt)
 
-    return response.content, retrieved
+    try:
+        response = llm.invoke(prompt)
+        return response.content, retrieved
+    except Exception:
+        return build_llm_error_answer(), retrieved
 
 
 # =========================
@@ -218,7 +297,9 @@ st.sidebar.markdown("### Contoh Pertanyaan")
 
 examples = [
     "Apa sanksi penyalahgunaan data pribadi?",
+    "Apa hukuman untuk orang yang menyalahgunakan data orang lain?",
     "Apa sanksi pencemaran nama baik di media sosial?",
+    "Apa hukuman bagi seseorang yang menyalahgunakan sosial media untuk menyebarkan kebohongan?",
     "Kategori II itu dendanya berapa?",
     "Apa yang dimaksud dengan tindak pidana?",
     "Apa hak subjek data pribadi?",
@@ -257,13 +338,20 @@ if user_query:
         st.markdown(user_query)
 
     with st.chat_message("assistant"):
-        with st.spinner("Mencari dasar hukum dan menyusun jawaban..."):
-            retrieved = retrieve_documents(user_query)
-            answer, sources = generate_answer(user_query, retrieved)
-
+        if is_too_general_query(user_query):
+            answer = build_too_general_answer()
             st.markdown(answer)
             save_assistant_message(answer)
-            st.session_state.sources = sources
+            st.session_state.sources = []
+
+        else:
+            with st.spinner("Mencari dasar hukum dan menyusun jawaban..."):
+                retrieved = retrieve_documents(user_query)
+                answer, sources = generate_answer(user_query, retrieved)
+
+                st.markdown(answer)
+                save_assistant_message(answer)
+                st.session_state.sources = sources
 
 
 st.divider()

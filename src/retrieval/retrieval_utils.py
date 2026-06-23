@@ -5,8 +5,55 @@ TOP_K_FINAL = 5
 MAX_SCORE_THRESHOLD = 0.90
 
 
+PDP_MISUSE_PATTERNS = [
+    "penyalahgunaan data",
+    "menyalahgunakan data",
+    "menyalahgunakan data pribadi",
+    "penyalahgunaan data pribadi",
+    "data orang lain",
+    "data pribadi orang lain",
+    "menggunakan data orang lain",
+    "menggunakan data pribadi orang lain",
+    "menyebarkan data orang lain",
+    "menyebarkan data pribadi",
+    "menyebarkan data pribadi orang lain",
+    "membocorkan data pribadi",
+    "membocorkan data orang lain",
+    "memakai data orang lain",
+    "memakai data pribadi orang lain",
+    "hukuman untuk orang yang menyalahgunakan data",
+    "hukuman menyalahgunakan data",
+]
+
+ITE_HOAX_PATTERNS = [
+    "berita bohong",
+    "kebohongan",
+    "menyebarkan kebohongan",
+    "penyebaran kebohongan",
+    "hoaks",
+    "hoax",
+    "informasi bohong",
+    "informasi palsu",
+    "informasi menyesatkan",
+    "menyesatkan",
+    "menyebarkan hoaks",
+    "menyebarkan hoax",
+    "menyebarkan berita bohong",
+    "sosial media",
+    "media sosial",
+    "menyalahgunakan sosial media",
+    "menyalahgunakan media sosial",
+    "penyalahgunaan sosial media",
+    "penyalahgunaan media sosial",
+]
+
+
 def normalize(text: str) -> str:
     return text.lower().strip()
+
+
+def contains_any(text: str, patterns: list[str]) -> bool:
+    return any(pattern in text for pattern in patterns)
 
 
 def is_definition_query(query: str) -> bool:
@@ -117,7 +164,8 @@ def expand_query(query: str) -> str:
             "dipidana pidana penjara pidana denda UU PDP Pasal 65 Pasal 66 Pasal 67 Pasal 68 Pasal 69"
         ),
         "kebocoran data": (
-            "pelanggaran pemrosesan data pribadi pengungkapan data pribadi tanpa izin melawan hukum UU PDP"
+            "pelanggaran pemrosesan data pribadi pengungkapan data pribadi tanpa izin "
+            "melawan hukum UU PDP Pasal 65 Pasal 66 Pasal 67 Pasal 68 Pasal 69"
         ),
         "pencemaran nama baik": (
             "menyerang kehormatan nama baik menuduhkan hal penghinaan informasi elektronik "
@@ -125,7 +173,12 @@ def expand_query(query: str) -> str:
         ),
         "fitnah": "pencemaran nama baik penghinaan kehormatan menuduhkan hal",
         "media sosial": "informasi elektronik dokumen elektronik sistem elektronik UU ITE",
-        "hoaks": "berita bohong informasi palsu informasi elektronik UU ITE",
+        "sosial media": "informasi elektronik dokumen elektronik sistem elektronik UU ITE media sosial",
+        "hoaks": "berita bohong informasi palsu informasi menyesatkan informasi elektronik UU ITE Pasal 28 Pasal 45A",
+        "hoax": "berita bohong informasi palsu informasi menyesatkan informasi elektronik UU ITE Pasal 28 Pasal 45A",
+        "berita bohong": "hoaks hoax informasi palsu informasi menyesatkan informasi elektronik UU ITE Pasal 28 Pasal 45A",
+        "informasi menyesatkan": "berita bohong hoaks hoax informasi palsu informasi elektronik UU ITE Pasal 28 Pasal 45A",
+        "kebohongan": "berita bohong hoaks hoax informasi palsu informasi menyesatkan informasi elektronik UU ITE Pasal 28 Pasal 45A",
         "tindak pidana": "perbuatan pidana ancaman pidana sanksi pidana KUHP",
         "penipuan": "tipu muslihat rangkaian kebohongan menguntungkan diri sendiri KUHP",
         "pencurian": "mengambil barang milik orang lain melawan hukum KUHP",
@@ -138,6 +191,26 @@ def expand_query(query: str) -> str:
         if key in q:
             expansions.append(value)
 
+    if contains_any(q, PDP_MISUSE_PATTERNS):
+        expansions.append(
+            "penyalahgunaan data pribadi data pribadi orang lain memperoleh mengumpulkan "
+            "mengungkapkan menggunakan data pribadi bukan miliknya secara melawan hukum "
+            "menguntungkan diri sendiri merugikan subjek data pribadi dilarang dipidana "
+            "pidana penjara pidana denda hukuman sanksi UU PDP Pasal 65 Pasal 66 "
+            "Pasal 67 Pasal 68 Pasal 69"
+        )
+
+    if contains_any(q, ITE_HOAX_PATTERNS):
+        expansions.append(
+            "berita bohong hoaks hoax informasi palsu informasi bohong informasi menyesatkan "
+            "media sosial sosial media informasi elektronik dokumen elektronik sistem elektronik "
+            "mendistribusikan mentransmisikan membuat dapat diakses sanksi pidana hukuman "
+            "pidana penjara pidana denda UU ITE Pasal 28 Pasal 45A"
+        )
+
+    if "hukuman" in q:
+        expansions.append("sanksi pidana dipidana pidana penjara pidana denda")
+
     return query + (" " + " ".join(expansions) if expansions else "")
 
 
@@ -148,11 +221,14 @@ def detect_domain_hint(query: str) -> str:
         x in q
         for x in [
             "data pribadi",
+            "data orang lain",
+            "data pribadi orang lain",
             "doxing",
             "doksing",
             "kebocoran data",
             "privasi",
             "penyalahgunaan data",
+            "menyalahgunakan data",
             "hak subjek data pribadi",
             "hak pemilik data pribadi",
             "subjek data",
@@ -165,6 +241,7 @@ def detect_domain_hint(query: str) -> str:
         x in q
         for x in [
             "media sosial",
+            "sosial media",
             "ite",
             "elektronik",
             "informasi elektronik",
@@ -172,6 +249,14 @@ def detect_domain_hint(query: str) -> str:
             "sistem elektronik",
             "transaksi elektronik",
             "hoaks",
+            "hoax",
+            "berita bohong",
+            "kebohongan",
+            "informasi bohong",
+            "informasi palsu",
+            "informasi menyesatkan",
+            "menyebarkan kebohongan",
+            "menyalahgunakan sosial media",
             "pencemaran nama baik",
             "penghinaan online",
         ]
@@ -183,6 +268,7 @@ def detect_domain_hint(query: str) -> str:
         for x in [
             "tindak pidana",
             "pidana",
+            "hukuman",
             "denda",
             "kategori",
             "pencurian",
@@ -202,6 +288,12 @@ def is_in_scope(query: str) -> bool:
 
     allowed_terms = [
         "data pribadi",
+        "data orang lain",
+        "data pribadi orang lain",
+        "menyalahgunakan data",
+        "penyalahgunaan data",
+        "menggunakan data orang lain",
+        "membocorkan data",
         "pdp",
         "privasi",
         "doxing",
@@ -216,10 +308,25 @@ def is_in_scope(query: str) -> bool:
         "sistem elektronik",
         "transaksi elektronik",
         "media sosial",
+        "sosial media",
+        "penyalahgunaan media sosial",
+        "penyalahgunaan sosial media",
+        "menyalahgunakan media sosial",
+        "menyalahgunakan sosial media",
         "hoaks",
+        "hoax",
+        "berita bohong",
+        "kebohongan",
+        "menyebarkan kebohongan",
+        "penyebaran kebohongan",
+        "informasi bohong",
+        "informasi palsu",
+        "informasi menyesatkan",
+        "menyesatkan",
         "pencemaran nama baik",
         "penghinaan",
         "pidana",
+        "hukuman",
         "tindak pidana",
         "kuhp",
         "denda",
@@ -363,17 +470,27 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
 
     important_terms = [
         "data pribadi",
+        "data orang lain",
         "subjek data",
         "pengendali data",
         "informasi elektronik",
         "dokumen elektronik",
         "sistem elektronik",
         "transaksi elektronik",
+        "media sosial",
+        "sosial media",
+        "berita bohong",
+        "informasi bohong",
+        "informasi palsu",
+        "informasi menyesatkan",
+        "hoaks",
+        "hoax",
         "penghinaan",
         "pencemaran",
         "nama baik",
         "kehormatan",
         "pidana",
+        "hukuman",
         "denda",
         "kategori",
         "tindak pidana",
@@ -434,21 +551,28 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
         x in q
         for x in [
             "data pribadi",
+            "data orang lain",
+            "data pribadi orang lain",
             "doxing",
             "doksing",
             "kebocoran data",
             "penyalahgunaan data",
+            "menyalahgunakan data",
+            "membocorkan data",
+            "menggunakan data orang lain",
         ]
     ):
         if is_uu_pdp(doc_name):
-            score += 5
+            score += 12
 
         if any(
             x in q
             for x in [
                 "sanksi",
                 "pidana",
+                "hukuman",
                 "penyalahgunaan",
+                "menyalahgunakan",
                 "melawan hukum",
                 "denda",
                 "dilarang",
@@ -464,11 +588,16 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
                     "pidana penjara",
                     "pidana denda",
                     "melawan hukum",
+                    "data pribadi yang bukan miliknya",
+                    "menggunakan data pribadi",
+                    "mengungkapkan data pribadi",
+                    "memperoleh data pribadi",
+                    "mengumpulkan data pribadi",
                 ]
             ):
-                score += 10
-            if pasal in ["65", "66", "67", "68", "69"]:
                 score += 14
+            if pasal in ["65", "66", "67", "68", "69"]:
+                score += 24
             if pasal in ["5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]:
                 score -= 5
             if pasal in ["56", "57", "58", "59", "60"]:
@@ -478,27 +607,53 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
         x in q
         for x in [
             "media sosial",
+            "sosial media",
             "ite",
             "hoaks",
+            "hoax",
+            "berita bohong",
+            "kebohongan",
+            "menyebarkan kebohongan",
+            "informasi bohong",
+            "informasi palsu",
+            "informasi menyesatkan",
+            "menyesatkan",
+            "menyalahgunakan sosial media",
+            "menyalahgunakan media sosial",
             "pencemaran nama baik",
             "penghinaan",
         ]
     ):
         if "ite" in doc_name or "informasi dan transaksi elektronik" in doc_name:
-            score += 10
+            score += 14
+
         if any(
             term in t
             for term in [
-                "menyerang kehormatan",
-                "nama baik",
+                "berita bohong",
+                "menyesatkan",
                 "informasi elektronik",
                 "dokumen elektronik",
                 "sistem elektronik",
+                "media sosial",
+                "menyerang kehormatan",
+                "nama baik",
+                "mendistribusikan",
+                "mentransmisikan",
+                "membuat dapat diakses",
+                "dipidana",
+                "pidana penjara",
+                "pidana denda",
             ]
         ):
-            score += 9
-        if pasal in ["27A", "45", "45A", "45B"]:
+            score += 12
+
+        if pasal in ["28", "45A"]:
+            score += 28
+
+        if pasal in ["27A", "45", "45B"]:
             score += 10
+
         if is_kuhp_2023(doc_name) and pasal in ["433", "434", "435", "436"]:
             score -= 8
 
