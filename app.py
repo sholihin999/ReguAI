@@ -14,7 +14,6 @@ from src.retrieval.retrieval_utils import (
 )
 from src.utils.config import VECTOR_DB_PATH
 
-
 load_dotenv()
 
 st.set_page_config(
@@ -24,6 +23,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# =========================
+# Custom CSS
+# =========================
 
 # =========================
 # Custom CSS
@@ -35,19 +37,33 @@ st.markdown(
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
     :root {
-        --bg-main: #f4f7fb;
-        --bg-sidebar: #eef3f9;
+        --bg-main: #f7f8ff;
+        --bg-main-2: #eef4ff;
+        --bg-sidebar: #f1f5fb;
+
+        --primary: #3157d5;
+        --primary-dark: #223b8f;
+        --primary-soft: #e9eeff;
+
+        --accent: #7c3aed;
+        --accent-soft: #f1eaff;
+
+        --gold: #f6b73c;
+        --gold-soft: #fff5df;
+
+        --success: #10b981;
+        --danger: #ef4444;
+
+        --text-main: #172033;
+        --text-soft: #475569;
+        --text-muted: #718096;
+
         --card: #ffffff;
-        --card-soft: #f8fbff;
-        --primary: #0f3d75;
-        --primary-light: #1d6fd1;
-        --primary-soft: #e5f0ff;
-        --gold: #f5b942;
-        --gold-soft: #fff5dd;
-        --text-main: #111827;
-        --text-muted: #64748b;
-        --border: #d9e2ef;
-        --shadow: rgba(15, 23, 42, 0.08);
+        --card-soft: #f9fbff;
+        --border: #dce4f2;
+
+        --shadow: rgba(41, 55, 120, 0.10);
+        --shadow-soft: rgba(41, 55, 120, 0.06);
     }
 
     * {
@@ -56,83 +72,88 @@ st.markdown(
 
     .stApp {
         background:
-            radial-gradient(circle at top right, rgba(29, 111, 209, 0.12), transparent 28%),
-            radial-gradient(circle at top left, rgba(245, 185, 66, 0.10), transparent 26%),
-            var(--bg-main);
+            radial-gradient(circle at 15% 10%, rgba(124, 58, 237, 0.10), transparent 28%),
+            radial-gradient(circle at 85% 5%, rgba(49, 87, 213, 0.13), transparent 30%),
+            radial-gradient(circle at 50% 100%, rgba(246, 183, 60, 0.08), transparent 26%),
+            linear-gradient(180deg, #fbfcff 0%, var(--bg-main) 45%, #ffffff 100%);
         color: var(--text-main);
     }
 
     header[data-testid="stHeader"] {
-        background: rgba(244, 247, 251, 0.82);
+        background: rgba(247, 248, 255, 0.82);
         backdrop-filter: blur(12px);
-        border-bottom: 1px solid rgba(217, 226, 239, 0.7);
+        border-bottom: 1px solid rgba(220, 228, 242, 0.75);
     }
 
+    /* ================= Sidebar ================= */
+
     div[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #edf4ff 0%, #f7f9fc 100%);
+        background:
+            linear-gradient(180deg, #eef4ff 0%, #f7f9fd 55%, #f8fafc 100%);
         border-right: 1px solid var(--border);
     }
 
     div[data-testid="stSidebar"] > div {
-        padding-top: 1.6rem;
+        padding: 2rem 1.25rem 1.5rem 1.25rem;
     }
 
     .sidebar-brand {
-        font-size: 29px;
+        font-size: 30px;
         font-weight: 800;
-        color: var(--primary);
+        color: var(--primary-dark);
         margin-bottom: 2rem;
-        padding-left: 0.2rem;
-        letter-spacing: -0.03em;
+        letter-spacing: -0.04em;
     }
 
     .sidebar-card {
-        background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
-        border: 1px solid #d7e6fb;
-        border-radius: 18px;
-        padding: 20px 18px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(248,251,255,0.96) 100%);
+        border: 1px solid #d9e4f7;
+        border-radius: 20px;
+        padding: 20px 20px;
         margin-bottom: 24px;
-        box-shadow: 0 10px 28px rgba(15, 61, 117, 0.08);
+        box-shadow: 0 14px 34px var(--shadow-soft);
     }
 
     .sidebar-card-title {
         font-size: 15px;
         font-weight: 800;
-        letter-spacing: 0.10em;
-        color: var(--primary);
-        margin-bottom: 14px;
+        letter-spacing: 0.12em;
+        color: var(--primary-dark);
+        margin-bottom: 16px;
     }
 
     .sidebar-card p {
         font-size: 14px;
         line-height: 1.6;
-        color: #334155;
+        color: var(--text-soft);
         margin-bottom: 14px;
     }
 
-    .sidebar-card .dataset-title {
+    .dataset-title {
         font-size: 11px;
         font-weight: 800;
-        color: var(--primary-light);
+        color: var(--primary);
         text-transform: uppercase;
         margin-top: 12px;
         margin-bottom: 8px;
     }
 
     .sidebar-card ul {
-        padding-left: 18px;
+        padding-left: 20px;
         margin-top: 0;
         margin-bottom: 14px;
     }
 
     .sidebar-card li {
-        color: #334155;
+        color: var(--text-soft);
         font-size: 14px;
         margin-bottom: 7px;
+        line-height: 1.45;
     }
 
     .sidebar-card li::marker {
-        color: var(--primary-light);
+        color: var(--primary);
     }
 
     .sidebar-note {
@@ -146,183 +167,235 @@ st.markdown(
     .example-title {
         font-size: 15px;
         font-weight: 800;
-        letter-spacing: 0.10em;
-        color: var(--primary);
+        letter-spacing: 0.12em;
+        color: var(--primary-dark);
         margin-bottom: 14px;
         text-transform: uppercase;
     }
 
     div[data-testid="stSidebar"] .stButton > button {
         width: 100%;
-        min-height: 64px;
-        background: #ffffff;
-        color: #1e293b;
-        border: 1px solid var(--border);
+        min-height: 54px;
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--text-main);
+        border: 1px solid #d5deee;
         border-radius: 14px;
-        text-align: left;
-        justify-content: flex-start;
-        padding: 14px 16px;
+        padding: 12px 14px;
         margin-bottom: 9px;
         font-size: 14px;
         font-weight: 600;
-        box-shadow: 0 5px 14px rgba(15, 23, 42, 0.05);
-        transition: all 0.2s ease;
-        white-space: normal;
         line-height: 1.35;
+        text-align: center;
+        justify-content: center;
+        white-space: normal;
+        box-shadow: 0 6px 16px rgba(41, 55, 120, 0.055);
+        transition: all 0.22s ease;
     }
 
     div[data-testid="stSidebar"] .stButton > button:hover {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-        border-color: var(--primary-light);
-        color: #ffffff;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        color: white;
+        border-color: transparent;
         transform: translateY(-1px);
-        box-shadow: 0 10px 22px rgba(29, 111, 209, 0.20);
+        box-shadow: 0 12px 26px rgba(49, 87, 213, 0.23);
     }
 
     .reset-area {
-        margin-top: 22px;
+        margin-top: 24px;
         padding-top: 18px;
         border-top: 1px solid var(--border);
     }
 
+    /* ================= Main Layout ================= */
+
+    .block-container {
+        max-width: 1180px;
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+
     .main-container {
-        max-width: 1080px;
+        max-width: 980px;
         margin: 0 auto;
-        padding-top: 18px;
+        padding-top: 8px;
     }
 
     .hero {
         text-align: center;
-        padding-top: 4px;
-        padding-bottom: 28px;
+        padding-top: 10px;
+        padding-bottom: 34px;
+    }
+
+    .hero-mini {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    .hero-icon {
+        font-size: 34px;
+        background:
+            linear-gradient(135deg, var(--gold-soft) 0%, #fffaf0 100%);
+        border: 1px solid #f8dfaa;
+        border-radius: 18px;
+        padding: 10px 14px;
+        box-shadow: 0 10px 24px rgba(246, 183, 60, 0.18);
     }
 
     .hero-title {
         font-size: 38px;
-        line-height: 1.15;
+        line-height: 1.1;
         font-weight: 800;
-        color: var(--primary);
-        margin-bottom: 10px;
-        letter-spacing: -0.04em;
+        color: var(--primary-dark);
+        letter-spacing: -0.05em;
     }
 
     .hero-subtitle {
         font-size: 16px;
         color: #334155;
         font-weight: 500;
-        margin-bottom: 0;
-    }
-
-    .hero-mini {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        justify-content: center;
-        margin-bottom: 12px;
-    }
-
-    .hero-icon {
-        font-size: 38px;
-        background: var(--gold-soft);
-        border: 1px solid #ffe1a3;
-        border-radius: 16px;
-        padding: 6px 10px;
-        box-shadow: 0 8px 22px rgba(245, 185, 66, 0.18);
+        margin-top: 4px;
     }
 
     .empty-space {
-        height: 52vh;
+        height: 42vh;
     }
+
+    /* ================= Chat Bubble ================= */
 
     div[data-testid="stChatMessage"] {
         background: transparent;
-        padding: 0.45rem 0;
-    }
-
-    div[data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
-        font-size: 15px;
-        line-height: 1.7;
+        padding: 0.55rem 0;
     }
 
     div[data-testid="stChatMessageContent"] {
-        background: rgba(255, 255, 255, 0.92);
-        border-radius: 18px;
-        border: 1px solid rgba(217, 226, 239, 0.95);
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid #dde6f5;
+        border-radius: 20px;
         padding: 18px 22px;
-        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        box-shadow: 0 14px 34px rgba(41, 55, 120, 0.07);
     }
 
+    div[data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
+        font-size: 15.5px;
+        line-height: 1.7;
+        color: var(--text-main);
+    }
+
+    div[data-testid="stChatMessage"] p {
+        margin-bottom: 0.75rem;
+    }
+
+    /* Avatar Chat */
+    div[data-testid="stChatMessage"] img {
+        border-radius: 12px;
+    }
+
+    /* ================= Chat Input ================= */
+
     div[data-testid="stChatInput"] {
-        max-width: 900px;
+        max-width: 760px;
         margin: 0 auto;
+        background: transparent !important;
+    }
+
+    div[data-testid="stChatInput"] > div {
+        background: #ffffff !important;
+        border: 1px solid #d8e2f0 !important;
+        border-radius: 22px !important;
+        box-shadow: 0 14px 34px rgba(41, 55, 120, 0.10) !important;
+        padding: 8px 10px !important;
     }
 
     div[data-testid="stChatInput"] textarea {
-        min-height: 64px !important;
-        font-size: 16px !important;
-        border-radius: 20px !important;
-        border: 1px solid var(--border) !important;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08) !important;
-        background: #ffffff !important;
+        min-height: 54px !important;
+        max-height: 160px !important;
+        font-size: 15.5px !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--text-main) !important;
+        padding: 14px 12px !important;
+    }
+
+    div[data-testid="stChatInput"] textarea:focus {
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
     }
 
     div[data-testid="stChatInput"] button {
-        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+        width: 42px !important;
+        height: 42px !important;
         border-radius: 14px !important;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important;
+        color: white !important;
+        box-shadow: 0 8px 20px rgba(49, 87, 213, 0.24) !important;
+        margin-right: 4px !important;
     }
+
+    section[data-testid="stBottom"] {
+        background: transparent !important;
+        border-top: none !important;
+        padding-bottom: 20px !important;
+    }
+    /* ================= Sources ================= */
 
     .source-title {
         display: flex;
         align-items: center;
         gap: 10px;
-        font-size: 26px;
+        font-size: 25px;
         font-weight: 800;
-        color: var(--primary);
-        margin-top: 24px;
+        color: var(--primary-dark);
+        margin-top: 26px;
         margin-bottom: 18px;
     }
 
     .source-title span {
-        font-size: 26px;
+        font-size: 25px;
     }
 
     .source-empty {
-        background: linear-gradient(135deg, #e8f2ff 0%, #f5faff 100%);
-        border: 1px solid #cfe3ff;
-        color: var(--primary);
-        padding: 15px 17px;
-        border-radius: 12px;
+        background: linear-gradient(135deg, #eef4ff 0%, #f9fbff 100%);
+        border: 1px solid #d4e2f6;
+        color: var(--primary-dark);
+        padding: 14px 16px;
+        border-radius: 14px;
         font-size: 14px;
         font-weight: 500;
     }
 
     div[data-testid="stExpander"] {
-        border: 1px solid var(--border);
-        border-radius: 14px;
+        border: 1px solid #dde6f5;
+        border-radius: 15px;
         background: #ffffff;
-        box-shadow: 0 5px 16px rgba(15, 23, 42, 0.045);
+        box-shadow: 0 7px 18px rgba(41, 55, 120, 0.05);
         margin-bottom: 10px;
         overflow: hidden;
     }
 
     div[data-testid="stExpander"] summary {
-        background: #fbfdff;
-        color: #1e293b;
+        background: linear-gradient(90deg, #fbfdff 0%, #f5f8ff 100%);
+        color: var(--text-main);
         font-weight: 600;
     }
 
     .source-meta {
         background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
         border-radius: 12px;
-        border: 1px solid var(--border);
+        border: 1px solid #dde6f5;
         padding: 13px 15px;
         margin-bottom: 12px;
         color: #334155;
+        line-height: 1.7;
     }
 
     .source-content {
         background: #ffffff;
-        border-left: 4px solid var(--gold);
+        border-left: 4px solid var(--accent);
         padding: 12px 15px;
         border-radius: 10px;
         color: #334155;
@@ -331,15 +404,15 @@ st.markdown(
 
     hr {
         border-color: var(--border);
-        margin-top: 32px;
+        margin-top: 34px;
         margin-bottom: 28px;
     }
 
-    .stSpinner > div {
-        color: var(--primary) !important;
-    }
-
     @media screen and (max-width: 768px) {
+        .block-container {
+            padding-top: 2rem;
+        }
+
         .hero-title {
             font-size: 28px;
         }
@@ -348,8 +421,13 @@ st.markdown(
             font-size: 14px;
         }
 
+        .hero-icon {
+            font-size: 28px;
+            padding: 8px 10px;
+        }
+
         .empty-space {
-            height: 32vh;
+            height: 30vh;
         }
     }
     </style>
@@ -357,10 +435,10 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # =========================
 # Load Resources
 # =========================
+
 
 @st.cache_resource
 def load_resources():
@@ -390,6 +468,7 @@ vectorstore, llm = load_resources()
 # =========================
 # Helper Functions
 # =========================
+
 
 def is_definition_question(query: str) -> bool:
     """
@@ -869,7 +948,9 @@ st.sidebar.markdown(
     unsafe_allow_html=True,
 )
 
-st.sidebar.markdown('<div class="example-title">CONTOH PERTANYAAN</div>', unsafe_allow_html=True)
+st.sidebar.markdown(
+    '<div class="example-title">CONTOH PERTANYAAN</div>', unsafe_allow_html=True
+)
 
 examples = [
     "Apa sanksi penyalahgunaan data pribadi?",
