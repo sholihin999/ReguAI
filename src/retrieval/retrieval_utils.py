@@ -1,5 +1,6 @@
 import re
 
+
 TOP_K_INITIAL = 30
 TOP_K_FINAL = 5
 MAX_SCORE_THRESHOLD = 0.90
@@ -45,6 +46,22 @@ ITE_HOAX_PATTERNS = [
     "menyalahgunakan media sosial",
     "penyalahgunaan sosial media",
     "penyalahgunaan media sosial",
+]
+
+THEFT_PATTERNS = [
+    "pencurian",
+    "mencuri",
+    "nyuri",
+    "curi",
+    "ngambil barang",
+    "mengambil barang",
+    "mengambil barang orang lain",
+    "mengambil milik orang lain",
+    "barang orang lain",
+    "mencuri barang",
+    "mencuri sedikit",
+    "ambil barang orang",
+    "mengambil barang milik orang lain",
 ]
 
 
@@ -181,7 +198,9 @@ def expand_query(query: str) -> str:
         "kebohongan": "berita bohong hoaks hoax informasi palsu informasi menyesatkan informasi elektronik UU ITE Pasal 28 Pasal 45A",
         "tindak pidana": "perbuatan pidana ancaman pidana sanksi pidana KUHP",
         "penipuan": "tipu muslihat rangkaian kebohongan menguntungkan diri sendiri KUHP",
-        "pencurian": "mengambil barang milik orang lain melawan hukum KUHP",
+        "pencurian": "mengambil barang milik orang lain melawan hukum KUHP Pasal 476 Pasal 477 Pasal 478",
+        "mencuri": "pencurian mengambil barang milik orang lain melawan hukum KUHP Pasal 476 Pasal 477 Pasal 478",
+        "nyuri": "pencurian mengambil barang milik orang lain melawan hukum KUHP Pasal 476 Pasal 477 Pasal 478",
         "kategori ii": "kategori II pidana denda paling banyak sepuluh juta rupiah KUHP Pasal 79",
         "kategori 2": "kategori II pidana denda paling banyak sepuluh juta rupiah KUHP Pasal 79",
         "denda kategori": "pidana denda kategori besaran denda KUHP Pasal 79",
@@ -206,6 +225,13 @@ def expand_query(query: str) -> str:
             "media sosial sosial media informasi elektronik dokumen elektronik sistem elektronik "
             "mendistribusikan mentransmisikan membuat dapat diakses sanksi pidana hukuman "
             "pidana penjara pidana denda UU ITE Pasal 28 Pasal 45A"
+        )
+
+    if contains_any(q, THEFT_PATTERNS):
+        expansions.append(
+            "pencurian mencuri mengambil barang sesuatu yang seluruhnya atau sebagian "
+            "milik orang lain dengan maksud untuk dimiliki secara melawan hukum "
+            "dipidana pidana penjara pidana denda KUHP Pasal 476 Pasal 477 Pasal 478"
         )
 
     if "hukuman" in q:
@@ -272,6 +298,12 @@ def detect_domain_hint(query: str) -> str:
             "denda",
             "kategori",
             "pencurian",
+            "mencuri",
+            "nyuri",
+            "curi",
+            "mengambil barang",
+            "ngambil barang",
+            "barang orang lain",
             "penipuan",
             "pembunuhan",
             "narkotika",
@@ -332,6 +364,14 @@ def is_in_scope(query: str) -> bool:
         "denda",
         "kategori",
         "pencurian",
+        "mencuri",
+        "nyuri",
+        "curi",
+        "mengambil barang",
+        "ngambil barang",
+        "mengambil barang orang lain",
+        "barang orang lain",
+        "mencuri barang",
         "penipuan",
         "narkotika",
         "sanksi",
@@ -496,6 +536,12 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
         "tindak pidana",
         "penipuan",
         "pencurian",
+        "mencuri",
+        "nyuri",
+        "curi",
+        "mengambil barang",
+        "barang orang lain",
+        "milik orang lain",
         "narkotika",
         "penyalahgunaan",
         "melawan hukum",
@@ -657,6 +703,30 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
         if is_kuhp_2023(doc_name) and pasal in ["433", "434", "435", "436"]:
             score -= 8
 
+    if contains_any(q, THEFT_PATTERNS):
+        if is_kuhp_2023(doc_name):
+            score += 10
+
+        if any(
+            term in t
+            for term in [
+                "mengambil",
+                "barang",
+                "milik orang lain",
+                "melawan hukum",
+                "dipidana",
+                "pidana penjara",
+                "pidana denda",
+            ]
+        ):
+            score += 12
+
+        if pasal in ["476", "477", "478"]:
+            score += 30
+
+        if pasal in ["479", "480", "481"]:
+            score += 8
+
     if any(
         x in q
         for x in ["kategori ii", "kategori 2", "denda kategori", "dendanya berapa"]
@@ -665,12 +735,6 @@ def keyword_score(query: str, text: str, metadata: dict) -> float:
             score += 5
         if pasal == "79":
             score += 30
-
-    if any(x in q for x in ["pencurian"]):
-        if is_kuhp_2023(doc_name):
-            score += 5
-        if pasal in ["476", "477", "478"]:
-            score += 25
 
     if any(x in q for x in ["penipuan"]):
         if is_kuhp_2023(doc_name):

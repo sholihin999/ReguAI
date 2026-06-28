@@ -14,10 +14,304 @@ from src.retrieval.retrieval_utils import (
 )
 from src.utils.config import VECTOR_DB_PATH
 
+
 load_dotenv()
 
-st.set_page_config(page_title="ReguAI", page_icon="⚖️", layout="wide")
+st.set_page_config(
+    page_title="ReguAI",
+    page_icon="⚖️",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 
+
+# =========================
+# Custom CSS
+# =========================
+
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    .stApp {
+        background: #f7f8fc;
+    }
+
+    header[data-testid="stHeader"] {
+        background: rgba(247, 248, 252, 0.85);
+        backdrop-filter: blur(10px);
+    }
+
+    div[data-testid="stSidebar"] {
+        background: #f4f6fb;
+        border-right: 1px solid #d8dde8;
+    }
+
+    div[data-testid="stSidebar"] > div {
+        padding-top: 1.5rem;
+    }
+
+    .sidebar-brand {
+        font-size: 28px;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 2rem;
+        padding-left: 0.2rem;
+    }
+
+    .sidebar-card {
+        background: #eef4ff;
+        border: 1px solid #dbe7ff;
+        border-radius: 16px;
+        padding: 18px 18px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    .sidebar-card-title {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #111827;
+        margin-bottom: 14px;
+    }
+
+    .sidebar-card p {
+        font-size: 14px;
+        line-height: 1.55;
+        color: #374151;
+        margin-bottom: 14px;
+    }
+
+    .sidebar-card .dataset-title {
+        font-size: 11px;
+        font-weight: 800;
+        color: #0f62bd;
+        text-transform: uppercase;
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+
+    .sidebar-card ul {
+        padding-left: 18px;
+        margin-top: 0;
+        margin-bottom: 14px;
+    }
+
+    .sidebar-card li {
+        color: #374151;
+        font-size: 14px;
+        margin-bottom: 7px;
+    }
+
+    .sidebar-note {
+        font-size: 12px !important;
+        color: #6b7280 !important;
+        font-style: italic;
+        margin-top: 12px !important;
+        margin-bottom: 0 !important;
+    }
+
+    .example-title {
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: #111827;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+    }
+
+    div[data-testid="stSidebar"] .stButton > button {
+        width: 100%;
+        min-height: 64px;
+        background: #ffffff;
+        color: #1f2937;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+        text-align: left;
+        justify-content: flex-start;
+        padding: 14px 16px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        transition: all 0.2s ease;
+        white-space: normal;
+        line-height: 1.35;
+    }
+
+    div[data-testid="stSidebar"] .stButton > button:hover {
+        background: #f8fbff;
+        border-color: #2f80ed;
+        color: #0f62bd;
+        transform: translateY(-1px);
+    }
+
+    .reset-area {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid #d8dde8;
+    }
+
+    .main-container {
+        max-width: 1060px;
+        margin: 0 auto;
+        padding-top: 18px;
+    }
+
+    .hero {
+        text-align: center;
+        padding-top: 4px;
+        padding-bottom: 28px;
+    }
+
+    .hero-title {
+        font-size: 36px;
+        line-height: 1.15;
+        font-weight: 800;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .hero-subtitle {
+        font-size: 16px;
+        color: #111827;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    .hero-mini {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+
+    .hero-icon {
+        font-size: 36px;
+    }
+
+    .empty-space {
+        height: 54vh;
+    }
+
+    div[data-testid="stChatMessage"] {
+        background: transparent;
+        padding: 0.4rem 0;
+    }
+
+    div[data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
+        font-size: 15px;
+        line-height: 1.65;
+    }
+
+    div[data-testid="stChatMessageContent"] {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        padding: 18px 20px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    div[data-testid="stChatInput"] {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    div[data-testid="stChatInput"] textarea {
+        min-height: 64px !important;
+        font-size: 16px !important;
+        border-radius: 18px !important;
+    }
+
+    .source-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 26px;
+        font-weight: 800;
+        color: #111827;
+        margin-top: 24px;
+        margin-bottom: 18px;
+    }
+
+    .source-title span {
+        font-size: 26px;
+    }
+
+    .source-empty {
+        background: #eaf4ff;
+        border: 1px solid #d6eaff;
+        color: #0f62bd;
+        padding: 14px 16px;
+        border-radius: 10px;
+        font-size: 14px;
+    }
+
+    .stExpander {
+        background: #ffffff;
+        border-radius: 12px;
+    }
+
+    div[data-testid="stExpander"] {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+        margin-bottom: 10px;
+    }
+
+    .source-meta {
+        background: #f9fafb;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+    }
+
+    .source-content {
+        background: #ffffff;
+        border-left: 4px solid #2f80ed;
+        padding: 10px 14px;
+        border-radius: 8px;
+        color: #374151;
+        line-height: 1.7;
+    }
+
+    hr {
+        border-color: #e5e7eb;
+        margin-top: 30px;
+        margin-bottom: 28px;
+    }
+
+    @media screen and (max-width: 768px) {
+        .hero-title {
+            font-size: 28px;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+        }
+
+        .empty-space {
+            height: 32vh;
+        }
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# =========================
+# Load Resources
+# =========================
 
 @st.cache_resource
 def load_resources():
@@ -43,6 +337,10 @@ def load_resources():
 
 vectorstore, llm = load_resources()
 
+
+# =========================
+# Helper Functions
+# =========================
 
 def is_definition_question(query: str) -> bool:
     """
@@ -112,12 +410,6 @@ def is_too_general_query(query: str) -> bool:
     """
     Mengecek apakah pertanyaan terlalu umum sehingga tidak layak langsung
     dikirim ke LLM.
-
-    Contoh:
-    - "uu ite"
-    - "apa itu uu ite"
-    - "kuhp"
-    - "apa itu uu pdp"
     """
 
     q = query.lower().strip().replace("?", "")
@@ -244,6 +536,64 @@ ReguAI menjawab berdasarkan pasal dan dokumen hukum yang tersedia dalam basis da
 """
 
 
+def is_unsafe_legal_strategy_query(query: str) -> bool:
+    """
+    Mengecek pertanyaan yang meminta strategi untuk menghindari hukuman,
+    lolos dari tanggung jawab hukum, atau menghindari proses hukum.
+    """
+
+    q = query.lower().strip()
+
+    unsafe_patterns = [
+        "cara menghindari hukuman",
+        "bagaimana cara menghindari hukuman",
+        "menghindari hukuman",
+        "agar tidak dihukum",
+        "supaya tidak dihukum",
+        "biar tidak dihukum",
+        "biar gak dihukum",
+        "biar tidak kena hukuman",
+        "biar gak kena hukuman",
+        "biar lolos",
+        "agar lolos",
+        "supaya lolos",
+        "cara lolos dari hukuman",
+        "cara lolos dari jerat hukum",
+        "cara menghindari jerat hukum",
+        "cara menghindari polisi",
+        "cara menghindari pidana",
+        "cara bebas dari hukuman",
+        "tips menghindari hukuman",
+        "trik menghindari hukuman",
+        "bagaimana supaya tidak dipidana",
+        "bagaimana agar tidak dipidana",
+        "supaya tidak dipidana",
+        "agar tidak dipidana",
+    ]
+
+    return any(pattern in q for pattern in unsafe_patterns)
+
+
+def build_unsafe_legal_strategy_answer():
+    """
+    Jawaban standar untuk pertanyaan yang meminta strategi menghindari hukuman.
+    """
+
+    return """
+ReguAI tidak memberikan panduan untuk menghindari hukuman, menghindari proses hukum, atau lolos dari tanggung jawab hukum.
+
+Namun, ReguAI dapat membantu menjelaskan ketentuan hukum yang tersedia dalam basis data secara informatif. Silakan ajukan pertanyaan seperti:
+- Apa sanksi pencemaran nama baik di media sosial?
+- Apa hukuman jika menyebarkan kebohongan di media sosial?
+- Apa sanksi penyalahgunaan data pribadi?
+- Apa sanksi pencurian?
+- Apa sanksi penipuan?
+
+Catatan:
+Jawaban ReguAI bersifat informatif, berdasarkan dokumen hukum yang tersedia, dan bukan merupakan nasihat hukum resmi.
+"""
+
+
 def build_llm_error_answer():
     """
     Jawaban standar ketika retrieval berhasil tetapi pemanggilan LLM gagal.
@@ -262,11 +612,6 @@ Hasil retrieval sumber hukum berhasil dilakukan, tetapi proses penyusunan jawaba
 def retrieve_documents(query: str):
     """
     Melakukan retrieval dokumen dari FAISS.
-
-    Catatan:
-    Reranking dilakukan sebelum threshold final agar query natural seperti
-    "hukuman menyalahgunakan sosial media untuk menyebarkan kebohongan"
-    tidak langsung ditolak hanya karena distance semantic awal cukup besar.
     """
 
     if not is_in_scope(query):
@@ -288,6 +633,12 @@ def retrieve_documents(query: str):
         "informasi palsu",
         "informasi menyesatkan",
         "menyesatkan",
+        "mencuri",
+        "nyuri",
+        "curi",
+        "mengambil barang",
+        "ngambil barang",
+        "barang orang lain",
     ]
 
     q = query.lower().strip()
@@ -337,15 +688,6 @@ def save_assistant_message(answer: str):
 def generate_answer(user_query: str, retrieved):
     """
     Membuat jawaban berdasarkan hasil retrieval.
-
-    Untuk pertanyaan definisi:
-    - Sistem hanya menggunakan dokumen ranking pertama.
-    - Sumber yang ditampilkan juga hanya ranking pertama agar konsisten.
-
-    Untuk pertanyaan non-definisi:
-    - Sistem menggunakan seluruh hasil reranking.
-
-    Fungsi ini juga diberi try-except agar aplikasi tidak crash jika Groq error.
     """
 
     if not retrieved:
@@ -380,49 +722,8 @@ def generate_answer(user_query: str, retrieved):
 
 
 # =========================
-# UI Streamlit
+# Session State
 # =========================
-
-st.title("⚖️ ReguAI")
-st.caption(
-    "Chatbot Hukum Digital dan Hukum Pidana Indonesia berbasis Retrieval-Augmented Generation"
-)
-
-st.sidebar.title("Tentang ReguAI")
-st.sidebar.info("""
-ReguAI adalah chatbot informasi hukum berbasis RAG.
-
-Dataset:
-- UU PDP 2022
-- UU ITE 2008
-- UU ITE 2016
-- UU ITE 2024
-- KUHP 2023
-- UU Penyesuaian Pidana 2026
-
-Jawaban bersifat informatif dan bukan nasihat hukum resmi.
-""")
-
-st.sidebar.markdown("### Contoh Pertanyaan")
-
-examples = [
-    "Apa sanksi penyalahgunaan data pribadi?",
-    "Apa hukuman untuk orang yang menyalahgunakan data orang lain?",
-    "Apa sanksi pencemaran nama baik di media sosial?",
-    "Apa hukuman bagi seseorang yang menyalahgunakan sosial media untuk menyebarkan kebohongan?",
-    "Kategori II itu dendanya berapa?",
-    "Apa yang dimaksud dengan tindak pidana?",
-    "Apa hak subjek data pribadi?",
-    "Apa sanksi doxing?",
-]
-
-for example in examples:
-    st.sidebar.code(example)
-
-if st.sidebar.button("Reset Chat"):
-    st.session_state.messages = []
-    st.session_state.sources = []
-    st.rerun()
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -430,13 +731,87 @@ if "messages" not in st.session_state:
 if "sources" not in st.session_state:
     st.session_state.sources = []
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+if "pending_query" not in st.session_state:
+    st.session_state.pending_query = None
 
-user_query = st.chat_input("Tanyakan persoalan hukum digital atau pidana...")
 
-if user_query:
+# =========================
+# Sidebar
+# =========================
+
+st.sidebar.markdown('<div class="sidebar-brand">ReguAI</div>', unsafe_allow_html=True)
+
+st.sidebar.markdown(
+    """
+    <div class="sidebar-card">
+        <div class="sidebar-card-title">TENTANG REGUAI</div>
+        <p>ReguAI adalah chatbot informasi hukum berbasis RAG.</p>
+        <div class="dataset-title">DATASET:</div>
+        <ul>
+            <li>UU PDP 2022</li>
+            <li>UU ITE 2008</li>
+            <li>UU ITE 2016</li>
+            <li>UU ITE 2024</li>
+            <li>KUHP 2023</li>
+            <li>UU Penyesuaian Pidana 2026</li>
+        </ul>
+        <p class="sidebar-note">Jawaban bersifat informatif dan bukan nasihat hukum resmi.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+st.sidebar.markdown('<div class="example-title">CONTOH PERTANYAAN</div>', unsafe_allow_html=True)
+
+examples = [
+    "Apa sanksi penyalahgunaan data pribadi?",
+    "Apa hukuman untuk pencemaran nama baik?",
+    "Kategori II itu dendanya berapa?",
+    "Apa hak subjek data pribadi?",
+    "Apa sanksi doxing?",
+]
+
+for idx, example in enumerate(examples):
+    if st.sidebar.button(example, key=f"example_{idx}"):
+        st.session_state.pending_query = example
+        st.rerun()
+
+st.sidebar.markdown('<div class="reset-area"></div>', unsafe_allow_html=True)
+
+if st.sidebar.button("⟳  Reset Chat", key="reset_chat"):
+    st.session_state.messages = []
+    st.session_state.sources = []
+    st.session_state.pending_query = None
+    st.rerun()
+
+
+# =========================
+# Main UI
+# =========================
+
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <div class="hero">
+        <div class="hero-mini">
+            <span class="hero-icon">⚖️</span>
+            <span class="hero-title">Selamat Datang di ReguAI</span>
+        </div>
+        <p class="hero-subtitle">
+            Chatbot Hukum Digital dan Hukum Pidana Berbasis Retrieval-Augmented Generation (RAG)
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+def process_query(user_query: str):
+    """
+    Memproses pertanyaan pengguna dan menampilkan jawaban.
+    """
+
     st.session_state.messages.append(
         {
             "role": "user",
@@ -454,6 +829,12 @@ if user_query:
             save_assistant_message(answer)
             st.session_state.sources = []
 
+        elif is_unsafe_legal_strategy_query(user_query):
+            answer = build_unsafe_legal_strategy_answer()
+            st.markdown(answer)
+            save_assistant_message(answer)
+            st.session_state.sources = []
+
         else:
             with st.spinner("Mencari dasar hukum dan menyusun jawaban..."):
                 retrieved = retrieve_documents(user_query)
@@ -464,30 +845,82 @@ if user_query:
                 st.session_state.sources = sources
 
 
-st.divider()
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-st.subheader("📚 Sumber yang Digunakan")
+if not st.session_state.messages:
+    st.markdown('<div class="empty-space"></div>', unsafe_allow_html=True)
 
-if st.session_state.sources:
-    for i, (doc, distance_score, k_score, combined_score) in enumerate(
-        st.session_state.sources,
-        1,
-    ):
-        nama_dokumen = doc.metadata.get("nama_dokumen", "-")
-        pasal = doc.metadata.get("pasal", "-")
-        domain = doc.metadata.get("domain", "-")
-        tahun = doc.metadata.get("tahun", "-")
-        clean_content = doc.page_content.replace("passage: ", "")
+if st.session_state.pending_query:
+    query_from_button = st.session_state.pending_query
+    st.session_state.pending_query = None
+    process_query(query_from_button)
+    st.rerun()
 
-        with st.expander(f"Sumber {i}: Pasal {pasal} - {nama_dokumen}"):
-            st.write(f"**Domain:** {domain}")
-            st.write(f"**Tahun:** {tahun}")
-            st.write(f"**Dokumen:** {nama_dokumen}")
-            st.write(f"**Pasal:** {pasal}")
-            st.write(f"**Distance Score:** {distance_score:.4f}")
-            st.write(f"**Keyword Score:** {k_score:.2f}")
-            st.write(f"**Final Score:** {combined_score:.4f}")
-            st.markdown("**Isi potongan dokumen:**")
-            st.write(clean_content[:2500])
-else:
-    st.info("Sumber akan muncul setelah kamu mengajukan pertanyaan.")
+user_query = st.chat_input("Tanyakan persoalan hukum digital atau pidana...")
+
+if user_query:
+    process_query(user_query)
+    st.rerun()
+
+
+# =========================
+# Sources
+# =========================
+
+if st.session_state.messages:
+    st.divider()
+
+    st.markdown(
+        '<div class="source-title"><span>📚</span> Sumber yang Digunakan</div>',
+        unsafe_allow_html=True,
+    )
+
+    if st.session_state.sources:
+        for i, (doc, distance_score, k_score, combined_score) in enumerate(
+            st.session_state.sources,
+            1,
+        ):
+            nama_dokumen = doc.metadata.get("nama_dokumen", "-")
+            pasal = doc.metadata.get("pasal", "-")
+            domain = doc.metadata.get("domain", "-")
+            tahun = doc.metadata.get("tahun", "-")
+            clean_content = doc.page_content.replace("passage: ", "")
+
+            with st.expander(f"Sumber {i}: Pasal {pasal} - {nama_dokumen}"):
+                st.markdown(
+                    f"""
+                    <div class="source-meta">
+                        <b>Domain:</b> {domain}<br>
+                        <b>Tahun:</b> {tahun}<br>
+                        <b>Dokumen:</b> {nama_dokumen}<br>
+                        <b>Pasal:</b> {pasal}<br>
+                        <b>Distance Score:</b> {distance_score:.4f}<br>
+                        <b>Keyword Score:</b> {k_score:.2f}<br>
+                        <b>Final Score:</b> {combined_score:.4f}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                st.markdown("**Isi potongan dokumen:**")
+                st.markdown(
+                    f"""
+                    <div class="source-content">
+                        {clean_content[:2500]}
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+    else:
+        st.markdown(
+            """
+            <div class="source-empty">
+                Sumber akan muncul setelah sistem menemukan dokumen hukum yang relevan.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+st.markdown("</div>", unsafe_allow_html=True)
