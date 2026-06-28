@@ -73,7 +73,7 @@ Pertanyaan pengguna:
 
 Format jawaban wajib:
 
-Jawaban singkat:
+Jawaban:
 ...
 
 Dasar hukum:
