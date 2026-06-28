@@ -34,64 +34,86 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+    :root {
+        --bg-main: #f4f7fb;
+        --bg-sidebar: #eef3f9;
+        --card: #ffffff;
+        --card-soft: #f8fbff;
+        --primary: #0f3d75;
+        --primary-light: #1d6fd1;
+        --primary-soft: #e5f0ff;
+        --gold: #f5b942;
+        --gold-soft: #fff5dd;
+        --text-main: #111827;
+        --text-muted: #64748b;
+        --border: #d9e2ef;
+        --shadow: rgba(15, 23, 42, 0.08);
+    }
+
     * {
         font-family: 'Inter', sans-serif;
     }
 
     .stApp {
-        background: #f7f8fc;
+        background:
+            radial-gradient(circle at top right, rgba(29, 111, 209, 0.12), transparent 28%),
+            radial-gradient(circle at top left, rgba(245, 185, 66, 0.10), transparent 26%),
+            var(--bg-main);
+        color: var(--text-main);
     }
 
     header[data-testid="stHeader"] {
-        background: rgba(247, 248, 252, 0.85);
-        backdrop-filter: blur(10px);
+        background: rgba(244, 247, 251, 0.82);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(217, 226, 239, 0.7);
     }
 
     div[data-testid="stSidebar"] {
-        background: #f4f6fb;
-        border-right: 1px solid #d8dde8;
+        background: linear-gradient(180deg, #edf4ff 0%, #f7f9fc 100%);
+        border-right: 1px solid var(--border);
     }
 
     div[data-testid="stSidebar"] > div {
-        padding-top: 1.5rem;
+        padding-top: 1.6rem;
     }
 
     .sidebar-brand {
-        font-size: 28px;
+        font-size: 29px;
         font-weight: 800;
-        color: #111827;
+        color: var(--primary);
         margin-bottom: 2rem;
         padding-left: 0.2rem;
+        letter-spacing: -0.03em;
     }
 
     .sidebar-card {
-        background: #eef4ff;
-        border: 1px solid #dbe7ff;
-        border-radius: 16px;
-        padding: 18px 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+        border: 1px solid #d7e6fb;
+        border-radius: 18px;
+        padding: 20px 18px;
         margin-bottom: 24px;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+        box-shadow: 0 10px 28px rgba(15, 61, 117, 0.08);
     }
 
     .sidebar-card-title {
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.10em;
+        color: var(--primary);
         margin-bottom: 14px;
     }
 
     .sidebar-card p {
         font-size: 14px;
-        line-height: 1.55;
-        color: #374151;
+        line-height: 1.6;
+        color: #334155;
         margin-bottom: 14px;
     }
 
     .sidebar-card .dataset-title {
         font-size: 11px;
         font-weight: 800;
-        color: #0f62bd;
+        color: var(--primary-light);
         text-transform: uppercase;
         margin-top: 12px;
         margin-bottom: 8px;
@@ -104,24 +126,28 @@ st.markdown(
     }
 
     .sidebar-card li {
-        color: #374151;
+        color: #334155;
         font-size: 14px;
         margin-bottom: 7px;
     }
 
+    .sidebar-card li::marker {
+        color: var(--primary-light);
+    }
+
     .sidebar-note {
         font-size: 12px !important;
-        color: #6b7280 !important;
+        color: var(--text-muted) !important;
         font-style: italic;
         margin-top: 12px !important;
         margin-bottom: 0 !important;
     }
 
     .example-title {
-        font-size: 16px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        color: #111827;
+        font-size: 15px;
+        font-weight: 800;
+        letter-spacing: 0.10em;
+        color: var(--primary);
         margin-bottom: 14px;
         text-transform: uppercase;
     }
@@ -130,36 +156,37 @@ st.markdown(
         width: 100%;
         min-height: 64px;
         background: #ffffff;
-        color: #1f2937;
-        border: 1px solid #d1d5db;
-        border-radius: 10px;
+        color: #1e293b;
+        border: 1px solid var(--border);
+        border-radius: 14px;
         text-align: left;
         justify-content: flex-start;
         padding: 14px 16px;
-        margin-bottom: 8px;
+        margin-bottom: 9px;
         font-size: 14px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        font-weight: 600;
+        box-shadow: 0 5px 14px rgba(15, 23, 42, 0.05);
         transition: all 0.2s ease;
         white-space: normal;
         line-height: 1.35;
     }
 
     div[data-testid="stSidebar"] .stButton > button:hover {
-        background: #f8fbff;
-        border-color: #2f80ed;
-        color: #0f62bd;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        border-color: var(--primary-light);
+        color: #ffffff;
         transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(29, 111, 209, 0.20);
     }
 
     .reset-area {
         margin-top: 22px;
         padding-top: 18px;
-        border-top: 1px solid #d8dde8;
+        border-top: 1px solid var(--border);
     }
 
     .main-container {
-        max-width: 1060px;
+        max-width: 1080px;
         margin: 0 auto;
         padding-top: 18px;
     }
@@ -171,16 +198,17 @@ st.markdown(
     }
 
     .hero-title {
-        font-size: 36px;
+        font-size: 38px;
         line-height: 1.15;
         font-weight: 800;
-        color: #111827;
+        color: var(--primary);
         margin-bottom: 10px;
+        letter-spacing: -0.04em;
     }
 
     .hero-subtitle {
         font-size: 16px;
-        color: #111827;
+        color: #334155;
         font-weight: 500;
         margin-bottom: 0;
     }
@@ -188,35 +216,40 @@ st.markdown(
     .hero-mini {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         justify-content: center;
         margin-bottom: 12px;
     }
 
     .hero-icon {
-        font-size: 36px;
+        font-size: 38px;
+        background: var(--gold-soft);
+        border: 1px solid #ffe1a3;
+        border-radius: 16px;
+        padding: 6px 10px;
+        box-shadow: 0 8px 22px rgba(245, 185, 66, 0.18);
     }
 
     .empty-space {
-        height: 54vh;
+        height: 52vh;
     }
 
     div[data-testid="stChatMessage"] {
         background: transparent;
-        padding: 0.4rem 0;
+        padding: 0.45rem 0;
     }
 
     div[data-testid="stChatMessage"] div[data-testid="stMarkdownContainer"] {
         font-size: 15px;
-        line-height: 1.65;
+        line-height: 1.7;
     }
 
     div[data-testid="stChatMessageContent"] {
-        background: #ffffff;
-        border-radius: 16px;
-        border: 1px solid #e5e7eb;
-        padding: 18px 20px;
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 18px;
+        border: 1px solid rgba(217, 226, 239, 0.95);
+        padding: 18px 22px;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
     }
 
     div[data-testid="stChatInput"] {
@@ -227,7 +260,15 @@ st.markdown(
     div[data-testid="stChatInput"] textarea {
         min-height: 64px !important;
         font-size: 16px !important;
-        border-radius: 18px !important;
+        border-radius: 20px !important;
+        border: 1px solid var(--border) !important;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08) !important;
+        background: #ffffff !important;
+    }
+
+    div[data-testid="stChatInput"] button {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%) !important;
+        border-radius: 14px !important;
     }
 
     .source-title {
@@ -236,7 +277,7 @@ st.markdown(
         gap: 10px;
         font-size: 26px;
         font-weight: 800;
-        color: #111827;
+        color: var(--primary);
         margin-top: 24px;
         margin-bottom: 18px;
     }
@@ -246,48 +287,56 @@ st.markdown(
     }
 
     .source-empty {
-        background: #eaf4ff;
-        border: 1px solid #d6eaff;
-        color: #0f62bd;
-        padding: 14px 16px;
-        border-radius: 10px;
-        font-size: 14px;
-    }
-
-    .stExpander {
-        background: #ffffff;
+        background: linear-gradient(135deg, #e8f2ff 0%, #f5faff 100%);
+        border: 1px solid #cfe3ff;
+        color: var(--primary);
+        padding: 15px 17px;
         border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
     }
 
     div[data-testid="stExpander"] {
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
         background: #ffffff;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.025);
+        box-shadow: 0 5px 16px rgba(15, 23, 42, 0.045);
         margin-bottom: 10px;
+        overflow: hidden;
+    }
+
+    div[data-testid="stExpander"] summary {
+        background: #fbfdff;
+        color: #1e293b;
+        font-weight: 600;
     }
 
     .source-meta {
-        background: #f9fafb;
-        border-radius: 10px;
-        border: 1px solid #e5e7eb;
-        padding: 12px 14px;
+        background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 13px 15px;
         margin-bottom: 12px;
+        color: #334155;
     }
 
     .source-content {
         background: #ffffff;
-        border-left: 4px solid #2f80ed;
-        padding: 10px 14px;
-        border-radius: 8px;
-        color: #374151;
-        line-height: 1.7;
+        border-left: 4px solid var(--gold);
+        padding: 12px 15px;
+        border-radius: 10px;
+        color: #334155;
+        line-height: 1.75;
     }
 
     hr {
-        border-color: #e5e7eb;
-        margin-top: 30px;
+        border-color: var(--border);
+        margin-top: 32px;
         margin-bottom: 28px;
+    }
+
+    .stSpinner > div {
+        color: var(--primary) !important;
     }
 
     @media screen and (max-width: 768px) {
@@ -410,9 +459,70 @@ def is_too_general_query(query: str) -> bool:
     """
     Mengecek apakah pertanyaan terlalu umum sehingga tidak layak langsung
     dikirim ke LLM.
+
+    Pertanyaan definisi yang tersedia di dokumen seperti:
+    - Apa itu data pribadi?
+    - Apa yang dimaksud dengan data pribadi?
+    - Apa itu transaksi elektronik?
+    - Apa yang dimaksud dengan tindak pidana?
+    tidak dianggap terlalu umum.
     """
 
-    q = query.lower().strip().replace("?", "")
+    q_original = query.lower().strip().replace("?", "")
+    q = q_original
+
+    allowed_definition_queries = [
+        "apa itu data pribadi",
+        "apa definisi data pribadi",
+        "definisi data pribadi",
+        "pengertian data pribadi",
+        "apa yang dimaksud data pribadi",
+        "apa yang dimaksud dengan data pribadi",
+        "apa yang dimaksud dengan data pribadi menurut uu pdp",
+        "apa yang dimaksud data pribadi menurut uu pdp",
+        "apa itu subjek data pribadi",
+        "apa definisi subjek data pribadi",
+        "definisi subjek data pribadi",
+        "pengertian subjek data pribadi",
+        "apa yang dimaksud subjek data pribadi",
+        "apa yang dimaksud dengan subjek data pribadi",
+        "apa itu pengendali data pribadi",
+        "apa definisi pengendali data pribadi",
+        "definisi pengendali data pribadi",
+        "pengertian pengendali data pribadi",
+        "apa pengertian pengendali data pribadi",
+        "apa yang dimaksud pengendali data pribadi",
+        "apa yang dimaksud dengan pengendali data pribadi",
+        "apa itu pemrosesan data pribadi",
+        "apa definisi pemrosesan data pribadi",
+        "definisi pemrosesan data pribadi",
+        "pengertian pemrosesan data pribadi",
+        "apa yang dimaksud pemrosesan data pribadi",
+        "apa yang dimaksud dengan pemrosesan data pribadi",
+        "apa itu transaksi elektronik",
+        "apa definisi transaksi elektronik",
+        "definisi transaksi elektronik",
+        "pengertian transaksi elektronik",
+        "apa yang dimaksud transaksi elektronik",
+        "apa yang dimaksud dengan transaksi elektronik",
+        "apa itu informasi elektronik",
+        "apa definisi informasi elektronik",
+        "apa yang dimaksud dengan informasi elektronik",
+        "apa itu dokumen elektronik",
+        "apa definisi dokumen elektronik",
+        "apa yang dimaksud dengan dokumen elektronik",
+        "apa itu sistem elektronik",
+        "apa definisi sistem elektronik",
+        "apa yang dimaksud dengan sistem elektronik",
+        "apa yang dimaksud dengan tindak pidana",
+        "apa yang dimaksud tindak pidana",
+        "apa itu tindak pidana",
+        "apa definisi tindak pidana",
+        "pengertian tindak pidana",
+    ]
+
+    if q_original in allowed_definition_queries:
+        return False
 
     definition_prefixes = [
         "apa itu ",
@@ -446,8 +556,6 @@ def is_too_general_query(query: str) -> bool:
         "kitab undang-undang hukum pidana",
         "hukum digital",
         "hukum pidana",
-        "data pribadi",
-        "tindak pidana",
         "pidana",
         "pasal",
         "uu",
