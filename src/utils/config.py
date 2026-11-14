@@ -13,7 +13,7 @@ VECTOR_DB_PATH = str(VECTOR_DB_DIR)
 
 # Model
 EMBEDDING_MODEL = "intfloat/multilingual-e5-base"
-MODEL_NAME = "llama-3.1-8b-instant"
+MODEL_NAME = "openai/gpt-oss-120b"
 LLM_TEMPERATURE = 0
 
 
