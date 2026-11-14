@@ -1,6 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
+import traceback
 
 from src.embedding.embedding_model import get_embedding_model
 from src.llm.llm_client import get_llm
@@ -897,6 +898,7 @@ def generate_answer(user_query: str, retrieved):
             response = llm.invoke(prompt)
             return response.content, retrieved[:1]
         except Exception:
+            traceback.print_exc()
             return build_llm_error_answer(), retrieved[:1]
 
     prompt = build_legal_prompt(user_query, docs)
@@ -905,6 +907,7 @@ def generate_answer(user_query: str, retrieved):
         response = llm.invoke(prompt)
         return response.content, retrieved
     except Exception:
+        traceback.print_exc()
         return build_llm_error_answer(), retrieved
 
 
