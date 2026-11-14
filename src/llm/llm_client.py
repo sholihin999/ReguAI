@@ -9,7 +9,7 @@ def get_llm():
 
     Model:
     - Groq
-    - llama-3.1-8b-instant
+    - openai/gpt-oss-120b
 
     Temperature dibuat 0 agar jawaban lebih konsisten,
     karena ReguAI menjawab berdasarkan dokumen hukum.
